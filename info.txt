@@ -1,0 +1,8 @@
+By default, serial devices are mounted so that only root users can access the device. We need to add a udev rule to make them readable by non-root users. udev is the device manager for the Linux kernel and handles what happens when something like a serial device is plugged in. For security reasons, most Docker containers execute their processes under a non-root user. This means we need to change some permissions to give that user access to the serial device. We can do this by defining a new udev rule.
+
+Create a file named /etc/udev/rules.d/99-serial.rules. Add the following line to that file:
+
+KERNEL=="ttyUSB[0-9]*",MODE="0666"
+All of the default udev rules are located in /lib/udev/rules.d. You can't change the default files, but you can add new rules in /etc/udev/rules.d, which is what we've done above. All of the rules, from all directories, are sorted and processed in alphabetical order. By naming our new rule starting with "99", we ensure any built-in rules are run first, then our rules are run after.
+
+MODE="0666" will give all users read/write (but not execute) permissions to any ttyUSB devices. When using USB-to-Serial converters, you'll typically see them mounted with this name. If your device is being mounted with a different name, you may need to change this rule to match.
